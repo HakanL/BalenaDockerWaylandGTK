@@ -1,0 +1,71 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim-arm64v8
+
+RUN curl -sSL https://archive.raspberrypi.org/debian/raspberrypi.gpg.key -o /etc/apt/trusted.gpg.d/raspberrypi.asc
+RUN echo "deb http://archive.raspberrypi.org/debian bookworm main" >>  /etc/apt/sources.list.d/raspi.list
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+		less \
+		libraspberrypi-bin \
+		kmod \
+		nano \
+		net-tools \
+		ifupdown \
+		iputils-ping \
+		i2c-tools \
+		usbutils \
+        ca-certificates \
+        curl \
+		libgtk-3-0 \
+		openocd \
+		joe \
+		dbus \
+		sway \
+		kbd \
+		xwayland \
+		x11-xserver-utils \
+		seatd \
+		sudo \
+		util-linux \
+		grep \
+		udev \
+		openssh-server \
+		libfontconfig1 \
+		libinput10 \
+		i2c-tools \
+		libgpiod-dev \
+		gpiod \
+		libasound2-dev \
+		libjansson-dev \
+		libturbojpeg0-dev \
+        \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN adduser --uid 1500 --shell /bin/bash --gecos "Display User,,," --disabled-password displayuser \
+  && chown -R displayuser:displayuser /home/displayuser
+
+COPY ./groups /etc/group
+RUN chmod 644 /etc/group
+
+ENV Logging__Console__FormatterName=Json
+
+# Configure web servers to bind to port 80 when present
+ENV ASPNETCORE_URLS=http://+:80 \
+# Enable detection of running in a container
+DOTNET_RUNNING_IN_CONTAINER=true
+
+RUN mkdir /var/run/sshd \
+ && passwd -d 'root' \
+ && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
+ && sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords yes/' /etc/ssh/sshd_config
+
+WORKDIR /usr/src
+COPY scripts scripts
+RUN chmod +x scripts/*
+
+RUN ulimit -c 0
+
+WORKDIR /app
+COPY sway.cfg .
+
+EXPOSE 22/tcp
+CMD ["/usr/src/scripts/start.sh"]

@@ -1,0 +1,41 @@
+version: '2.1'
+networks: {}
+volumes:
+  resin-data: {}
+  udevdata:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /run/udev/data
+  logs:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  tmpstorage:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+services:
+  main:
+    build:
+      context: .
+      dockerfile: Dockerfile.arm64
+    privileged: true
+    tty: true
+    environment:
+      - 'DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket'
+    ports:
+      - "22:22"
+    expose: [22]
+    restart: always
+    network_mode: host
+    volumes:
+      - 'resin-data:/data'
+      - 'udevdata:/run/udev/data'
+    labels:
+      io.resin.features.kernel-modules: '1'
+      io.resin.features.firmware: '1'
+      io.resin.features.dbus: '1'
+      io.resin.features.supervisor-api: '1'
+      io.resin.features.resin-api: '1'
