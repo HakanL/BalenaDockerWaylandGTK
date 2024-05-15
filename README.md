@@ -14,4 +14,4 @@ Sample project for a docker container based on Bookworm and with Wayland and GTK
 Base image: mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim-arm64v8
 
 Note that this is coming from a commercial closed-source project (that I own), so it has some bits and pieces that can be cleaned up to make this container cleaner (like I had to create dev nodes for sdaX or my USB stick wouldn't show up).
-I'm happy to accept PRs to clean this up further, but I wanted to share this to the community as a starting point, I know it would've helped me a lot in the beginning.
+I'm happy to accept PRs to clean this up further, but I wanted to share this with the community as a starting point, I know it would've helped me a lot in the beginning.
